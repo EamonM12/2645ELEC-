@@ -11,14 +11,14 @@ public:
   std::string get_type(); 
   std::string get_design();
   int get_poles();
-  int get_fc();
+  double get_fc();
 
 private:
   // member variables for all the different combinations
   std::string type; 
   std::string design;
   int poles;
-  int fc;
+  double fc;
 };
 
 #endif

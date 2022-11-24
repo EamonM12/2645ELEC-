@@ -16,7 +16,7 @@ Inputs::Inputs() {
   poles = stoi(p); // converting to int
 
   std::string f;
-  std::cout << "\n What is your cut-off frequency?: \n";
+  std::cout << "\n What is your cut-off frequency?:\n";
   std::cin >> f;
   fc = stoi(f); // converting to int
 }
@@ -24,4 +24,4 @@ Inputs::Inputs() {
 std::string Inputs::get_type() { return (type); }
 std::string Inputs::get_design() { return (design); }
 int Inputs::get_poles() { return (poles); }
-int Inputs::get_fc() { return (fc); }
+double Inputs::get_fc() { return (fc); }
