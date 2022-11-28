@@ -1,14 +1,17 @@
 #include "inputs.h"
 #include <iostream>
 #define PI 3.14159265
-#include <array>    // mention in code
-#include <string.h> //
+#include <array> // mention in code
+#include <cmath>
+#include <string.h>
 
 void active_filter_config();
-// double butterworth(int poles, int fc);
+std::array<double, 6> Butterworth(int poles, int fc);
+
 // bool test_sum(double a, double b, double expected); //unit test
 // int run_sum_tests();
-std::array<double, 5> Butterworth(int poles, int fc);
+// bool test(double a, double b, std::array<double, 6> expected);
+// int run_test();
 
 int main() {
 
@@ -16,10 +19,10 @@ int main() {
   std::cout << "\n*******Filter Calculator*******\n";
   std::cout << "\nAre you designing a activer filer?(y/n)\n ";
   std::cin >> input;
-
-  // run_sum_tests();
+  // run_test();
   if (input == "y") {
     active_filter_config();
+
   } else if (input == "n") {
 
   } else {
@@ -48,11 +51,14 @@ void active_filter_config() {
   case 1:
     // std::cout
     // << design; // printing values out to test butterworth func is called
-    std::array<double, 5> arr;
+    std::array<double, 6> arr;
     arr = Butterworth(poles, fc);
-    std::cout << "\n " << arr[2] << "\n "; // testing outputs
-    std::cout << "\n " << arr[1] << "\n "; // testing outputs
-    std::cout << "\n " << arr[0] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[0] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[1] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[2] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[3] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[4] << "\n "; // testing outputs
+    // std::cout << "\n " << arr[5] << "\n "; // testing outputs
 
     break;
   case 2:
@@ -64,12 +70,12 @@ void active_filter_config() {
   }
 }
 
-std::array<double, 5> Butterworth(int poles, int fc) {
+std::array<double, 6> Butterworth(int poles, int fc) {
   // initialising rb and cap values
   int scale = 10;
   double rb = 10000;
   double c = 0.00000001;
-  std::array<double, 5> ra;
+  std::array<double, 6> ra;
   int i = 0;
   int z = 3;
   // initialsing k values for calculating rb
@@ -78,26 +84,77 @@ std::array<double, 5> Butterworth(int poles, int fc) {
   // iterating throug to select required K value
   for (int e = 0; e < 3; e++) {
     // setting calculated value equal to array spot to be returned
-    ra[i] = rb * (array[stages][e] - 1);
-    i = i + 1;
+    if (array[stages][e] == 0) {
+      ra[i] = 0;
+    } else {
+      ra[i] = rb * (array[stages][e] - 1);
+      i = i + 1;
+    }
     // std::cout<< "\n "<< ra[i]<< "\n "; testing output
   }
-  // converting f to a double
+
   for (int e = 0; e < stages; e++) {
+    // cacluating for all stages  and adding to array
     double f = fc;
     double rc = (1 / (f * 2 * PI));
     double r = rc / c;
     ra[z] = r;
     z = z + 1;
   }
-
   // std::cout << "\n " << ra << "\n "; inital testing
   // std::cout << "\n " << r << "\n ";inital testing
 
   return (ra);
 };
 
-// CODE IS FROM https://elec2645.github.io/106/testing.html
+// Unit test code is from https://elec2645.github.io/106/testing.html
+
+// // Function to test combinations
+// bool test(double a, double b, std::array<double, 6> expected) {
+//   std::array<double, 6> arr;
+//   arr = Butterworth(a, b);
+//   double s = arr[0];
+//   int count = 0;
+//   // for loop to check all values of the returned array
+//   for (int i = 0; i < 6; i++) {
+//     double s = round(arr[i]);
+//     double s1 = round(expected[i]);
+
+//     if (s1 == s) {
+//       // count to ensure all values in array are correct
+//       count = count + 1;
+
+//     }
+//   }
+
+//   if (count == 5) {
+//     std::cout << "passed\n";
+//     return true;
+//   } else {
+//     // print all expected values for comparison
+//     for (int e = 0; e < 6; e++) {
+//       std::cout << "FAILED! "
+//                 <<" (expecting " << expected[e] << ").\n";
+//     }
+//     return false;
+//   }
+// }
+
+// // function to run the tests
+// int run_test() {
+//   std::cout << "\nTesting sum()...\n" << std::endl;
+//   // initialise counter for number of tests passed
+//   int passed = 0;
+//   // do various tests
+//   std::array<double, 6> arr = {680, 5860, 14830, 1989, 1989, 1989};
+//   if (test(6, 8000, arr))
+//     passed++;
+//     std::array<double, 6> arr2 = {1520, 13250, 0, 1768, 1768,0};
+//   if (test(4, 9000, arr2))
+//     passed++;
+//   std::cout << "\nsum() passed " << passed << " tests.\n";
+//   return passed;
+// }
 
 // // Function to test combinations
 // bool test_sum(double a, double b, double expected) {
@@ -126,5 +183,5 @@ std::array<double, 5> Butterworth(int poles, int fc) {
 //   if (test_sum(2, 900, 17683.883))
 //     passed++;
 //   std::cout << "\nsum() passed " << passed << " tests.\n";
-//   return passed;
+//   return passed ;
 // }
