@@ -5,9 +5,10 @@
 #include <string.h> //
 
 void active_filter_config();
-double butterworth(int poles, int fc);
-bool test_sum(double a, double b, double expected);
-int run_sum_tests();
+// double butterworth(int poles, int fc);
+// bool test_sum(double a, double b, double expected); //unit test
+// int run_sum_tests();
+std::array<double, 5> Butterworth(int poles, int fc);
 
 int main() {
 
@@ -16,9 +17,9 @@ int main() {
   std::cout << "\nAre you designing a activer filer?(y/n)\n ";
   std::cin >> input;
 
-  run_sum_tests();
+  // run_sum_tests();
   if (input == "y") {
-    // active_filter_config();
+    active_filter_config();
   } else if (input == "n") {
 
   } else {
@@ -47,7 +48,11 @@ void active_filter_config() {
   case 1:
     // std::cout
     // << design; // printing values out to test butterworth func is called
-    butterworth(poles, fc);
+    std::array<double, 5> arr;
+    arr = Butterworth(poles, fc);
+    std::cout << "\n " << arr[2] << "\n "; // testing outputs
+    std::cout << "\n " << arr[1] << "\n "; // testing outputs
+    std::cout << "\n " << arr[0] << "\n "; // testing outputs
 
     break;
   case 2:
@@ -59,32 +64,38 @@ void active_filter_config() {
   }
 }
 
-double butterworth(int poles, int fc) {
+std::array<double, 5> Butterworth(int poles, int fc) {
   // initialising rb and cap values
   int scale = 10;
-  float rb = 10000;
-  float c = 0.00000001;
-  float ra;
+  double rb = 10000;
+  double c = 0.00000001;
+  std::array<double, 5> ra;
+  int i = 0;
+  int z = 3;
   // initialsing k values for calculating rb
   float array[3][3] = {{1.586, 0, 0}, {1.152, 2.325, 0}, {1.068, 1.586, 2.483}};
-  int stages = poles / 2;
+  int stages = (poles / 2) - 1;
   // iterating throug to select required K value
-  for (int i = 0; i < stages; i++) {
-    ra = rb * (array[0][i] - 1);
+  for (int e = 0; e < 3; e++) {
+    // setting calculated value equal to array spot to be returned
+    ra[i] = rb * (array[stages][e] - 1);
+    i = i + 1;
+    // std::cout<< "\n "<< ra[i]<< "\n "; testing output
   }
   // converting f to a double
-  double f = fc;
-
-  double rc = (1 / (f * 2 * PI));
-  double r = rc / c;
+  for (int e = 0; e < stages; e++) {
+    double f = fc;
+    double rc = (1 / (f * 2 * PI));
+    double r = rc / c;
+    ra[z] = r;
+    z = z + 1;
+  }
 
   // std::cout << "\n " << ra << "\n "; inital testing
   // std::cout << "\n " << r << "\n ";inital testing
 
-  return (r);
+  return (ra);
 };
-
-std::array()
 
 // CODE IS FROM https://elec2645.github.io/106/testing.html
 
