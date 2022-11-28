@@ -1,6 +1,7 @@
 #include "inputs.h"
 #include <iostream>
 #define PI 3.14159265
+#include <array>    // mention in code
 #include <string.h> //
 
 void active_filter_config();
@@ -82,6 +83,10 @@ double butterworth(int poles, int fc) {
 
   return (r);
 };
+
+std::array()
+
+// CODE IS FROM https://elec2645.github.io/106/testing.html
 
 // // Function to test combinations
 // bool test_sum(double a, double b, double expected) {
