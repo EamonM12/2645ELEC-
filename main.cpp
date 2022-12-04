@@ -1,17 +1,21 @@
 #include "inputs.h"
 #include <iostream>
 #define PI 3.14159265
-#include <array> // mention in code
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <string.h>
 
 void active_filter_config();
 std::array<double, 6> Butterworth(int poles, int fc);
+std::array<double, 6> Chebyshev(int poles, int fc, std::string type);
 
 // bool test_sum(double a, double b, double expected); //unit test
 // int run_sum_tests();
 // bool test(double a, double b, std::array<double, 6> expected);
 // int run_test();
+// bool test_chebyshev(double a, double b, std::string c,
+// std::array<double, 6> expected);
 
 int main() {
 
@@ -31,6 +35,7 @@ int main() {
 }
 
 void active_filter_config() {
+  std::array<double, 6> arr;
 
   // creating constructor to create object with all inputs on it
   Inputs input;
@@ -51,7 +56,7 @@ void active_filter_config() {
   case 1:
     // std::cout
     // << design; // printing values out to test butterworth func is called
-    std::array<double, 6> arr;
+
     arr = Butterworth(poles, fc);
     // std::cout << "\n " << arr[0] << "\n "; // testing outputs
     // std::cout << "\n " << arr[1] << "\n "; // testing outputs
@@ -62,26 +67,33 @@ void active_filter_config() {
 
     break;
   case 2:
-    // chebyshev_half();
+
+    arr = Chebyshev(poles, fc, type);
+    std::cout << "\n " << arr[0] << "\n "; // testing outputs
+    std::cout << "\n " << arr[1] << "\n "; // testing outputs
+    std::cout << "\n " << arr[2] << "\n "; // testing outputs
+    std::cout << "\n " << arr[3] << "\n "; // testing outputs
+    std::cout << "\n " << arr[4] << "\n "; // testing outputs
+    std::cout << "\n " << arr[5] << "\n "; // testing outputs
     break;
+
   case 3:
-    // chebyshev_two();
     break;
   }
 }
-
+// function to calculate necessary values for a Butterworth Filter
 std::array<double, 6> Butterworth(int poles, int fc) {
-  // initialising rb and cap values
-  int scale = 10;
+  // initialising rb and cap values and array to return
   double rb = 10000;
   double c = 0.00000001;
   std::array<double, 6> ra;
   int i = 0;
   int z = 3;
   // initialsing k values for calculating rb
+  // 1st value corresponds to 1st stage - same for all values
   float array[3][3] = {{1.586, 0, 0}, {1.152, 2.325, 0}, {1.068, 1.586, 2.483}};
   int stages = (poles / 2) - 1;
-  // iterating throug to select required K value
+  // iterating through to select required K value
   for (int e = 0; e < 3; e++) {
     // setting calculated value equal to array spot to be returned
     if (array[stages][e] == 0) {
@@ -90,11 +102,8 @@ std::array<double, 6> Butterworth(int poles, int fc) {
       ra[i] = rb * (array[stages][e] - 1);
       i = i + 1;
     }
-    // std::cout<< "\n "<< ra[i]<< "\n "; testing output
-  }
-
-  for (int e = 0; e < stages; e++) {
-    // cacluating for all stages  and adding to array
+    // std::cout<< "\n "<< ra[i]<< "\n "; testing output    // cacluating for
+    // all stages  and adding to array
     double f = fc;
     double rc = (1 / (f * 2 * PI));
     double r = rc / c;
@@ -107,7 +116,101 @@ std::array<double, 6> Butterworth(int poles, int fc) {
   return (ra);
 };
 
+// Fucntion to caluclate values for Chebyshev 0.5 or 2
+std::array<double, 6> Chebyshev(int poles, int fc, std::string type) {
+
+  // initialsing
+  double rb = 10000;
+  double c = 0.00000001;
+  std::array<double, 6> arr;
+  double array[3][3] = {};
+  int i = 0;
+  int z = 3;
+
+  // array for both high low pass filters CN and K value
+  // First 3 arrays are for lp and last 3 are for hp
+  double cnl[3][3] = {{1.231, 0, 0}, {0.597, 1.031, 0}, {0.396, 0.768, 1.011}};
+  double cnh[3][3] = {{0.812, 0, 0}, {1.675, 0.970, 0}, {2.525, 1.302, 0.989}};
+  float k[3][3] = {{1.842, 0, 0}, {1.582, 2.660, 0}, {1.537, 2.448, 2.846}};
+
+  // std::cout<< type; testing correct passing of values
+  // if statement to determine what normalising factors to use
+  if (type == "h") {
+    std::copy(
+        &cnh[0][0], &cnh[0][0] + 9,
+        &array
+            [0]
+            [0]); // https://stackoverflow.com/questions/18709577/stdcopy-two-dimensional-array
+  } // array is used to store values of cn depending on input
+  if (type == "l") {
+
+    std::copy(
+        &cnl[0][0], &cnl[0][0] + 9,
+        &array
+            [0]
+            [0]); // https://stackoverflow.com/questions/18709577/stdcopy-two-dimensional-array
+    // std::cout << "\n " << "testing testing" << "\n "; // if statement works
+  }
+
+  // std::cout << "\n " << array[0][1] << "\n "; // testing outputs
+  // std::cout << "\n " << array[2][1] << "\n "; // testing outputs
+  // std::cout << "\n " << array[0][0] << "\n "; // testing outputs
+
+  for (int e = 0; e < ((poles / 2)); e++) {
+    // cacluating for all stages  and adding to
+
+    if (array[poles / 2][e] == 0) {
+      arr[i] = 0;
+    } else {
+      arr[i] = rb * (k[(poles / 2) - 1][e] - 1);
+      i = i + 1;
+    }
+    double f = fc;
+    double cn = array[(poles / 2) - 1][e];
+    // cacluation with normalsing factor included
+    double rc = (1 / (f * 2 * PI * cn));
+
+    double r = rc / c;
+    // std::cout << "\n " << r << "\n "; // testing outputs
+
+    arr[z] = r;
+    z = z + 1;
+  }
+  return (arr);
+}
 // Unit test code is from https://elec2645.github.io/106/testing.html
+
+// // // Function to test combinations
+// bool test_chebyshev(double a, double b, std::string c,
+//                     std::array<double, 6> expected) {
+//   std::array<double, 6> arr;
+//   arr = Chebyshev(a, b, c);
+//   int count = 0;
+//   // for loop to check all values of the returned array
+//   for (int i = 0; i < 6; i++) {
+//     float s = round(arr[i]);
+//     float s1 =round(expected[i]);
+
+//     if (s1 == s) {
+//       // count to ensure all values in array are correct
+//       count = count + 1;
+
+//     }
+//   }
+
+//   if (count == a) {
+//     std::cout << "passed\n";
+//     return true;
+//   } else {
+//     // print all expected values for comparison
+//     for (int e = 0; e < 6; e++) {
+//       std::cout << "FAILED! "
+//                 << "\nGOT " << arr[e] << " (expecting " << expected[e]
+//                 << ").\n";
+//     }
+//     return false;
+//   }
+// }
 
 // // Function to test combinations
 // bool test(double a, double b, std::array<double, 6> expected) {
@@ -140,17 +243,17 @@ std::array<double, 6> Butterworth(int poles, int fc) {
 //   }
 // }
 
-// // function to run the tests
+// function to run the tests
 // int run_test() {
 //   std::cout << "\nTesting sum()...\n" << std::endl;
 //   // initialise counter for number of tests passed
 //   int passed = 0;
 //   // do various tests
-//   std::array<double, 6> arr = {680, 5860, 14830, 1989, 1989, 1989};
-//   if (test(6, 8000, arr))
+//   std::array<double, 6> arr = {5370, 14480, 18460, 4019.06, 2072.33,
+//   1574.23}; if (test_chebyshev(6, 10000, "l", arr))
 //     passed++;
-//     std::array<double, 6> arr2 = {1520, 13250, 0, 1768, 1768,0};
-//   if (test(4, 9000, arr2))
+//   std::array<double, 6> arr2 = {5820, 16600, 0, 1055.75, 1823.08, 0};
+//   if (test_chebyshev(4, 9000, "h", arr2))
 //     passed++;
 //   std::cout << "\nsum() passed " << passed << " tests.\n";
 //   return passed;
