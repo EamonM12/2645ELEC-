@@ -14,6 +14,8 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type);
 // int run_sum_tests();
 // bool test(double a, double b, std::array<double, 6> expected);
 // int run_test();
+// bool test_chebyshev(double a, double b, std::string c,
+// std::array<double, 6> expected);
 
 int main() {
 
@@ -67,12 +69,15 @@ void active_filter_config() {
   case 2:
 
     arr = Chebyshev(poles, fc, type);
-    // std::cout << "\n " << arr[0] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[1] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[2] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[3] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[4] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[5] << "\n "; // testing outputs
+    std::cout << "\n " << arr[0] << "\n "; // testing outputs
+    std::cout << "\n " << arr[1] << "\n "; // testing outputs
+    std::cout << "\n " << arr[2] << "\n "; // testing outputs
+    std::cout << "\n " << arr[3] << "\n "; // testing outputs
+    std::cout << "\n " << arr[4] << "\n "; // testing outputs
+    std::cout << "\n " << arr[5] << "\n "; // testing outputs
+    break;
+
+  case 3:
     break;
   }
 }
@@ -97,11 +102,8 @@ std::array<double, 6> Butterworth(int poles, int fc) {
       ra[i] = rb * (array[stages][e] - 1);
       i = i + 1;
     }
-    // std::cout<< "\n "<< ra[i]<< "\n "; testing output
-  }
-
-  for (int e = 0; e < stages; e++) {
-    // cacluating for all stages  and adding to array
+    // std::cout<< "\n "<< ra[i]<< "\n "; testing output    // cacluating for
+    // all stages  and adding to array
     double f = fc;
     double rc = (1 / (f * 2 * PI));
     double r = rc / c;
@@ -160,25 +162,55 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type) {
     if (array[poles / 2][e] == 0) {
       arr[i] = 0;
     } else {
-      arr[i] = rb * (array[poles / 2][e] - 1);
+      arr[i] = rb * (k[(poles / 2) - 1][e] - 1);
       i = i + 1;
     }
     double f = fc;
-    double cn =  array[poles / 2][e];
+    double cn = array[(poles / 2) - 1][e];
     // cacluation with normalsing factor included
-    double rc = (1 / (f * 2 * PI *cn));
-    std::cout << "\n " << rc << "\n "; // testing outputs
+    double rc = (1 / (f * 2 * PI * cn));
 
     double r = rc / c;
-    std::cout << "\n " << r << "\n "; // testing outputs
-    
+    // std::cout << "\n " << r << "\n "; // testing outputs
+
     arr[z] = r;
     z = z + 1;
-
   }
   return (arr);
 }
 // Unit test code is from https://elec2645.github.io/106/testing.html
+
+// // // Function to test combinations
+// bool test_chebyshev(double a, double b, std::string c,
+//                     std::array<double, 6> expected) {
+//   std::array<double, 6> arr;
+//   arr = Chebyshev(a, b, c);
+//   int count = 0;
+//   // for loop to check all values of the returned array
+//   for (int i = 0; i < 6; i++) {
+//     float s = round(arr[i]);
+//     float s1 =round(expected[i]);
+
+//     if (s1 == s) {
+//       // count to ensure all values in array are correct
+//       count = count + 1;
+
+//     }
+//   }
+
+//   if (count == a) {
+//     std::cout << "passed\n";
+//     return true;
+//   } else {
+//     // print all expected values for comparison
+//     for (int e = 0; e < 6; e++) {
+//       std::cout << "FAILED! "
+//                 << "\nGOT " << arr[e] << " (expecting " << expected[e]
+//                 << ").\n";
+//     }
+//     return false;
+//   }
+// }
 
 // // Function to test combinations
 // bool test(double a, double b, std::array<double, 6> expected) {
@@ -211,17 +243,17 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type) {
 //   }
 // }
 
-// // function to run the tests
+// function to run the tests
 // int run_test() {
 //   std::cout << "\nTesting sum()...\n" << std::endl;
 //   // initialise counter for number of tests passed
 //   int passed = 0;
 //   // do various tests
-//   std::array<double, 6> arr = {680, 5860, 14830, 1989, 1989, 1989};
-//   if (test(6, 8000, arr))
+//   std::array<double, 6> arr = {5370, 14480, 18460, 4019.06, 2072.33,
+//   1574.23}; if (test_chebyshev(6, 10000, "l", arr))
 //     passed++;
-//     std::array<double, 6> arr2 = {1520, 13250, 0, 1768, 1768,0};
-//   if (test(4, 9000, arr2))
+//   std::array<double, 6> arr2 = {5820, 16600, 0, 1055.75, 1823.08, 0};
+//   if (test_chebyshev(4, 9000, "h", arr2))
 //     passed++;
 //   std::cout << "\nsum() passed " << passed << " tests.\n";
 //   return passed;
