@@ -5,11 +5,14 @@
 #include <array>
 #include <cmath>
 #include <string.h>
+#include <vector>
 
 void active_filter_config();
 std::array<double, 6> Butterworth(int poles, int fc);
-std::array<double, 6> Chebyshev(int poles, int fc, std::string type);
-
+std::array<double, 6> Chebyshev(int poles, int fc, std::string type,
+                                int design);
+void Select_Chebyshev(int db, std::string type, int stages,
+                      std::vector<double> &b, std::vector<double> &a);
 // bool test_sum(double a, double b, double expected); //unit test
 // int run_sum_tests();
 // bool test(double a, double b, std::array<double, 6> expected);
@@ -18,7 +21,6 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type);
 // std::array<double, 6> expected);
 
 int main() {
-
   std::string input;
   std::cout << "\n*******Filter Calculator*******\n";
   std::cout << "\nAre you designing a activer filer?(y/n)\n ";
@@ -50,37 +52,24 @@ void active_filter_config() {
   int fc = input.get_fc();
   // std::cout << poles; // Testing accessor for poles
 
-  // switch method to choose between designs
-  switch (design) {
-
-  case 1:
-    // std::cout
-    // << design; // printing values out to test butterworth func is called
-
+  if (design == 1) {
+    // std::cout << "TEST1"
+    // << "\n ";
     arr = Butterworth(poles, fc);
-    // std::cout << "\n " << arr[0] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[1] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[2] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[3] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[4] << "\n "; // testing outputs
-    // std::cout << "\n " << arr[5] << "\n "; // testing outputs
-
-    break;
-  case 2:
-
-    arr = Chebyshev(poles, fc, type);
+  }
+  if (design == 2 || design == 3) {
+    // std::cout << "TEST1"
+    // << "\n ";
+    arr = Chebyshev(poles, fc, type, design);
     std::cout << "\n " << arr[0] << "\n "; // testing outputs
     std::cout << "\n " << arr[1] << "\n "; // testing outputs
     std::cout << "\n " << arr[2] << "\n "; // testing outputs
     std::cout << "\n " << arr[3] << "\n "; // testing outputs
     std::cout << "\n " << arr[4] << "\n "; // testing outputs
     std::cout << "\n " << arr[5] << "\n "; // testing outputs
-    break;
-
-  case 3:
-    break;
   }
-}
+  }
+
 // function to calculate necessary values for a Butterworth Filter
 std::array<double, 6> Butterworth(int poles, int fc) {
   // initialising rb and cap values and array to return
@@ -116,57 +105,85 @@ std::array<double, 6> Butterworth(int poles, int fc) {
   return (ra);
 };
 
-// Fucntion to caluclate values for Chebyshev 0.5 or 2
-std::array<double, 6> Chebyshev(int poles, int fc, std::string type) {
+// function to determine what array values to use
+void Select_Chebyshev(int db, std::string type, int stages,
+                      std::vector<double> &b, std::vector<double> &a) {
+  // std::cout << "TEST";
 
+  // array values for cn lp/hp and k for 0.5db
+  // for both k first 3 are lp and last three are high pass
+
+  double cnl1[3][3] = {{1.231, 0, 0}, {0.597, 1.031, 0}, {0.396, 0.768, 1.011}};
+  // std::cout << "TEST1";
+  double cnh1[3][3] = {{0.812, 0, 0}, {1.675, 0.970, 0}, {2.525, 1.302, 0.989}};
+  double k1[3][3] = {{1.842, 0, 0}, {1.582, 2.660, 0}, {1.537, 2.448, 2.846}};
+  // array values for cn lp/hp and k for 2db
+  double cnl2[3][3] = {{0.907, 0, 0}, {0.471, 0.964, 0}, {0.316, 0.730, 0.983}};
+  double cnh2[3][3] = {{1.103, 0, 0}, {2.123, 1.037, 0}, {3.165, 1.370, 1.017}};
+  double k2[3][3] = {{2.114, 0, 0}, {1.924, 2.782, 0}, {1.891, 2.648, 2.904}};
+
+  // if branches for 0.5/2 DB and if LP OR HP
+  if (db == 2) {
+    for (int i = 0; i < 3; i++) {
+      // std::cout << "TEST2";
+      b.push_back(k1[stages - 1][i]);
+      if (type == "l") {
+        a.push_back(cnl1[stages - 1][i]);
+      }
+      if (type == "h") {
+        a.push_back(cnh1[stages - 1][i]);
+      }
+    }
+  }
+  // std::cout << "TEST2";
+  if (db == 3) {
+    for (int i = 0; i < 3; i++) {
+      b.push_back(k2[stages - 1][i]);
+      if (type == "l") {
+        a.push_back(cnl2[stages - 1][i]);
+      }
+      if (type == "h") {
+        a.push_back(cnh2[stages - 1][i]);
+      }
+    }
+  }
+}
+
+// Fucntion to caluclate values for Chebyshev 0.5 or 2
+std::array<double, 6> Chebyshev(int poles, int fc, std::string type,
+                                int design) {
   // initialsing
+
   double rb = 10000;
+  // std::cout << "TEST";
   double c = 0.00000001;
   std::array<double, 6> arr;
-  double array[3][3] = {};
+  std::vector<double> k;
+  std::vector<double> array;
+  int a = design;
+
+  int stages = poles / 2;
   int i = 0;
   int z = 3;
-
-  // array for both high low pass filters CN and K value
-  // First 3 arrays are for lp and last 3 are for hp
-  double cnl[3][3] = {{1.231, 0, 0}, {0.597, 1.031, 0}, {0.396, 0.768, 1.011}};
-  double cnh[3][3] = {{0.812, 0, 0}, {1.675, 0.970, 0}, {2.525, 1.302, 0.989}};
-  float k[3][3] = {{1.842, 0, 0}, {1.582, 2.660, 0}, {1.537, 2.448, 2.846}};
-
-  // std::cout<< type; testing correct passing of values
-  // if statement to determine what normalising factors to use
-  if (type == "h") {
-    std::copy(
-        &cnh[0][0], &cnh[0][0] + 9,
-        &array
-            [0]
-            [0]); // https://stackoverflow.com/questions/18709577/stdcopy-two-dimensional-array
-  } // array is used to store values of cn depending on input
-  if (type == "l") {
-
-    std::copy(
-        &cnl[0][0], &cnl[0][0] + 9,
-        &array
-            [0]
-            [0]); // https://stackoverflow.com/questions/18709577/stdcopy-two-dimensional-array
-    // std::cout << "\n " << "testing testing" << "\n "; // if statement works
-  }
-
-  // std::cout << "\n " << array[0][1] << "\n "; // testing outputs
-  // std::cout << "\n " << array[2][1] << "\n "; // testing outputs
-  // std::cout << "\n " << array[0][0] << "\n "; // testing outputs
+  Select_Chebyshev(a, type, stages, k, array);
+  // std::cout << "\n " << array[0] << "\n "; // testing outputs
+  // std::cout << "\n " << array[1] << "\n "; // testing outputs
+  // std::cout << "\n " << array[2] << "\n "; // testing outputs
+  // std::cout << "\n " << k[0] << "\n ";     // testing outputs
+  // std::cout << "\n " << k[1] << "\n ";     // testing outputs
+  // std::cout << "\n " << k[2] << "\n ";     // testing outputs
 
   for (int e = 0; e < ((poles / 2)); e++) {
     // cacluating for all stages  and adding to
 
-    if (array[poles / 2][e] == 0) {
+    if (array[e] == 0) {
       arr[i] = 0;
     } else {
-      arr[i] = rb * (k[(poles / 2) - 1][e] - 1);
+      arr[i] = rb * (k[e] - 1);
       i = i + 1;
     }
     double f = fc;
-    double cn = array[(poles / 2) - 1][e];
+    double cn = array[e];
     // cacluation with normalsing factor included
     double rc = (1 / (f * 2 * PI * cn));
 
