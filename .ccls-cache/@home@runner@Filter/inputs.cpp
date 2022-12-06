@@ -1,4 +1,4 @@
-#include "inputs.h"
+ #include "inputs.h"
 #include <iostream>
 
 // using constructor to manage all inputs

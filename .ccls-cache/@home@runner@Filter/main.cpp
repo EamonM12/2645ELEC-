@@ -1,3 +1,4 @@
+#include "Outputs.h"
 #include "inputs.h"
 #include <iostream>
 #define PI 3.14159265
@@ -37,8 +38,9 @@ int main() {
 }
 
 void active_filter_config() {
+  std::vector<double>a,b;
   std::array<double, 6> arr;
-
+  
   // creating constructor to create object with all inputs on it
   Inputs input;
   // getting desgin(butterworth / chebyshev(0.5dB/2db))
@@ -61,14 +63,16 @@ void active_filter_config() {
     // std::cout << "TEST1"
     // << "\n ";
     arr = Chebyshev(poles, fc, type, design);
-    std::cout << "\n " << arr[0] << "\n "; // testing outputs
-    std::cout << "\n " << arr[1] << "\n "; // testing outputs
-    std::cout << "\n " << arr[2] << "\n "; // testing outputs
-    std::cout << "\n " << arr[3] << "\n "; // testing outputs
-    std::cout << "\n " << arr[4] << "\n "; // testing outputs
-    std::cout << "\n " << arr[5] << "\n "; // testing outputs
   }
+  for(int i=0;i<3;i++){
+    a.push_back(arr[i]);
+    b.push_back(arr[5-i]);
   }
+  Outputs o(std::vector<double>a,std::vector<double>b);
+
+  
+}
+
 
 // function to calculate necessary values for a Butterworth Filter
 std::array<double, 6> Butterworth(int poles, int fc) {
