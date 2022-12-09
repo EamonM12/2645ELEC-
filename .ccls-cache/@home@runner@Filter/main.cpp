@@ -2,13 +2,16 @@
 #include "inputs.h"
 #include <iostream>
 #define PI 3.14159265
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <string.h>
-#include <vector>
+#include <algorithm> //https://cplusplus.com/reference/algorithm/
+#include <array>     //https://cplusplus.com/reference/array/
+#include <cmath>     // https://cplusplus.com/reference/cmath/
+#include <string.h>  //https://cplusplus.com/reference/cstring/
+#include <vector>    //https://cplusplus.com/reference/vector/
 
 void active_filter_config();
+void go_back();
+
+void output(std::vector<double> a, std::vector<double> b);
 std::array<double, 6> Butterworth(int poles, int fc);
 std::array<double, 6> Chebyshev(int poles, int fc, std::string type,
                                 int design);
@@ -22,25 +25,21 @@ void Select_Chebyshev(int db, std::string type, int stages,
 // std::array<double, 6> expected);
 
 int main() {
-  std::string input;
-  std::cout << "\n*******Filter Calculator*******\n";
-  std::cout << "\nAre you designing a activer filer?(y/n)\n ";
-  std::cin >> input;
+  std::cout
+      << "\n**************************************************************";
+  std::cout
+      << "\n**     Filter Calculator                                    **";
+  std::cout << "\n       RB = 10K  C = 10nF                                  ";
+
   // run_test();
-  if (input == "y") {
-    active_filter_config();
 
-  } else if (input == "n") {
-
-  } else {
-    std::cout << "Inavlid input";
-  }
+  active_filter_config();
 }
 
 void active_filter_config() {
-  std::vector<double>a,b;
+  std::vector<double> a, b;
   std::array<double, 6> arr;
-  
+
   // creating constructor to create object with all inputs on it
   Inputs input;
   // getting desgin(butterworth / chebyshev(0.5dB/2db))
@@ -57,22 +56,38 @@ void active_filter_config() {
   if (design == 1) {
     // std::cout << "TEST1"
     // << "\n ";
-    arr = Butterworth(poles, fc);
+  
+      arr = Butterworth(poles, fc);
+  
+      go_back();
+  
   }
   if (design == 2 || design == 3) {
     // std::cout << "TEST1"
     // << "\n ";
-    arr = Chebyshev(poles, fc, type, design);
-  }
-  for(int i=0;i<3;i++){
-    a.push_back(arr[i]);
-    b.push_back(arr[5-i]);
-  }
-  Outputs o(std::vector<double>a,std::vector<double>b);
-
+      arr = Chebyshev(poles, fc, type, design);
+      go_back();
   
+  }
+  for (int i = 0; i < 3; i++) {
+    a.push_back(arr[i]);
+    b.push_back(arr[5 - i]);
+  }
+  
+  Outputs o(std::vector<double> a, std::vector<double> b,  std::string type,
+  std::string design,int poles,double fc);
+
+  go_back();
 }
 
+void output(std::vector<double> a, std::vector<double> b) {
+  
+
+  for (int i = 0; i < 3; i++) {
+    std::cout << "\nStage:" << i + 1 << " Ra value: " << a[i] << "\n ";
+    std::cout << "\nStage:" << i + 1 << " Rc value: " << b[3-i-1] << "\n ";
+  }
+};
 
 // function to calculate necessary values for a Butterworth Filter
 std::array<double, 6> Butterworth(int poles, int fc) {
@@ -88,10 +103,15 @@ std::array<double, 6> Butterworth(int poles, int fc) {
   int stages = (poles / 2) - 1;
   // iterating through to select required K value
   for (int e = 0; e < 3; e++) {
+
     // setting calculated value equal to array spot to be returned
     if (array[stages][e] == 0) {
+
       ra[i] = 0;
+      i = i + 1;
+
     } else {
+
       ra[i] = rb * (array[stages][e] - 1);
       i = i + 1;
     }
@@ -108,6 +128,15 @@ std::array<double, 6> Butterworth(int poles, int fc) {
 
   return (ra);
 };
+
+void go_back() {
+  std::string i;
+  do {
+    std::cout << "\nEnter 'b' to go back to main menu: ";
+    std::cin >> i;
+  } while (i != "b");
+  main();
+}
 
 // function to determine what array values to use
 void Select_Chebyshev(int db, std::string type, int stages,
@@ -175,30 +204,53 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type,
   // std::cout << "\n " << array[2] << "\n "; // testing outputs
   // std::cout << "\n " << k[0] << "\n ";     // testing outputs
   // std::cout << "\n " << k[1] << "\n ";     // testing outputs
-  // std::cout << "\n " << k[2] << "\n ";     // testing outputs
+  // std::cout << "\n " << k[2] << "\n ";     // testing outputsl
 
-  for (int e = 0; e < ((poles / 2)); e++) {
+  for (int e = 0; e < 3; e++) {
     // cacluating for all stages  and adding to
 
-    if (array[e] == 0) {
-      arr[i] = 0;
+    if (k[e] == 0) {
+      
+          // testing outputs
+          arr[i] = 0;
+      i = i + 1;
     } else {
+
       arr[i] = rb * (k[e] - 1);
+      // std::cout << "\n " << arr[i] << "\n "; // testing outputs
       i = i + 1;
     }
-    double f = fc;
-    double cn = array[e];
-    // cacluation with normalsing factor included
-    double rc = (1 / (f * 2 * PI * cn));
+    if (array[e] == 0) {
+      arr[z] = 0;
+      z = z + 1;
 
-    double r = rc / c;
-    // std::cout << "\n " << r << "\n "; // testing outputs
+    } else {
+      double f = fc;
+      double cn = array[e];
 
-    arr[z] = r;
-    z = z + 1;
+      // cacluation with normalsing factor included
+      double rc = (1 / (f * 2 * PI * cn));
+
+      double r = rc / c;
+      // std::cout << "\n " << r << "\n "; // testing outputs
+      // std::cout << "\n " << r << "\n "; // testing outputs
+      arr[z] = r;
+      z = z + 1;
+    }
   }
+  //    std::cout << "\n " << arr[0] << "\n "; // testing outputs
+
+  //  std::cout << "\n " << arr[1] << "\n "; // testing outputs
+
+  //  std::cout << "\n " << arr[2] << "\n "; // testing outputs
+
+  //  std::cout << "\n " << arr[3] << "\n "; // testing outputs
+  // std::cout << "\n " << arr[4] << "\n "; // testing outputs
+  // std::cout << "\n " << arr[5] << "\n "; // testing outputs
+
   return (arr);
 }
+
 // Unit test code is from https://elec2645.github.io/106/testing.html
 
 // // // Function to test combinations

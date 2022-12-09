@@ -7,7 +7,8 @@
 
 class Outputs : public Inputs {
 public:
-  Outputs(std::vector<double> rc, std::vector<double> ra);
+  Outputs(std::string type, std::string design, int poles, double fc,
+          std::vector<double> rc, std::vector<double> ra);
 
   // mutators to access all values
   void set_ra(std::vector<double> ra);

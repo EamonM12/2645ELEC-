@@ -1,6 +1,7 @@
 #include "Outputs.h"
-Outputs::Outputs(std::vector<double> rc, std::vector<double> ra)
-    : Inputs{}, rc{rc}, ra {ra} {};
+Outputs::Outputs(std::string type, std::string design, int poles, double fc,
+                 std::vector<double> rc, std::vector<double> ra)
+    : Inputs{type, design, poles, fc}, rc{rc}, ra{ra} {};
 
 // //mutators
 void Outputs::set_rc(std::vector<double> rc) { rc = rc; }
