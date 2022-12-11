@@ -1,0 +1,25 @@
+
+Inputs:
+
+ Design: 2
+
+ Type: l
+
+ Poles: 2
+
+ Frequency: 100
+
+ Ouputs:
+
+Stage:1 Ra value: 8420
+ 
+Stage:1 Rc value: 129289
+ 
+Stage:2 Ra value: 0
+ 
+Stage:2 Rc value: 0
+ 
+Stage:3 Ra value: 0
+ 
+Stage:3 Rc value: 0
+ 
