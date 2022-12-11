@@ -1,6 +1,7 @@
 #include "Outputs.h"
 #include "inputs.h"
-#include <iostream>
+#include <fstream>  //https://cplusplus.com/reference/fstream/
+#include <iostream> //https://cplusplus.com/reference/iostream/
 #define PI 3.14159265
 #include <algorithm> //https://cplusplus.com/reference/algorithm/
 #include <array>     //https://cplusplus.com/reference/array/
@@ -10,6 +11,8 @@
 
 void active_filter_config();
 void go_back();
+void csv(std::vector<double> a, std::vector<double> b, std::string type,
+         std::string design, int poles, double fc);
 
 void output(std::vector<double> a, std::vector<double> b);
 std::array<double, 6> Butterworth(int poles, int fc);
@@ -39,53 +42,113 @@ int main() {
 void active_filter_config() {
   std::vector<double> a, b;
   std::array<double, 6> arr;
-
+  int design;
+  double fc;
+  int poles;
   // creating constructor to create object with all inputs on it
   Inputs input;
   // getting desgin(butterworth / chebyshev(0.5dB/2db))
-  int design = stoi(input.get_design());
+  // ensuring a string interger is inputted and the correct ones
+  try {
+    design = stoi(input.get_design());
+    if (design > 3 || design < 1) {
+      std::cout << "\n Invalid design try again\n";
+      go_back();
+    }
+  } catch (...) {
+    std::cout << "\n Invalid design try again\n";
+    go_back();
+  }
   // std::cout << design; // Testing accessor for design
   // getting type(h/l)
+  // handling for other inputs
   std::string type = input.get_type();
+  if (type != "l" && type != "h") {
+    std::cout << "\n Invalid type try again\n";
+    go_back();
+  }
+
   // std::cout << type; // Testing accessor for type
-  int poles = input.get_poles();
+  // accounting for incorrect inputs odd and even
+  try {
+    poles = stoi(input.get_poles());
+    if (poles % 2 != 0) {
+      std::cout << "\n Invalid number of poles try again\n";
+      go_back();
+    }
+    if ((poles / 2) > 3 || (poles / 2) < 1) {
+      std::cout << "\n Invalid number of poles try again\n";
+      go_back();
+    }
+  } catch (...) {
+    std::cout << "\n Invalid number of poles try again\n";
+    go_back();
+  }
+
   // std::cout << poles; // Testing accessor for poles
-  int fc = input.get_fc();
+  try {
+    fc = stoi(input.get_fc());
+  } catch (...) {
+    std::cout << "\n Invalid number frequency try again\n";
+    go_back();
+  }
+
   // std::cout << poles; // Testing accessor for poles
 
   if (design == 1) {
     // std::cout << "TEST1"
     // << "\n ";
-  
-      arr = Butterworth(poles, fc);
-  
-      go_back();
-  
+
+    arr = Butterworth(poles, fc);
   }
   if (design == 2 || design == 3) {
     // std::cout << "TEST1"
     // << "\n ";
-      arr = Chebyshev(poles, fc, type, design);
-      go_back();
-  
+    arr = Chebyshev(poles, fc, type, design);
   }
   for (int i = 0; i < 3; i++) {
     a.push_back(arr[i]);
     b.push_back(arr[5 - i]);
   }
-  
-  Outputs o(std::vector<double> a, std::vector<double> b,  std::string type,
-  std::string design,int poles,double fc);
+  output(a, b);
 
+  Outputs o(std::vector<double> a, std::vector<double> b, std::string type,
+            std::string design, int poles, double fc);
+
+  csv(a, b, type, std::to_string(design), poles, fc);
   go_back();
 }
 
+// code from https://elec2645.github.io/105/write-csv.html
+
+void csv(std::vector<double> a, std::vector<double> b, std::string type,
+         std::string design, int poles, double fc) {
+
+  std::ofstream output;
+  output.open("output.csv");
+  if (!output.is_open()) {
+    // print error message and quit if a problem occurred
+    std::cerr << "Error creating file!\n";
+    exit(1);
+  }
+  output <<"\nInputs:\n";
+  output << "\n Design: " << design << "\n";
+  output << "\n Type: " << type << "\n";
+  output << "\n Poles: " << poles << "\n";
+   output << "\n Frequency: " << fc << "\n";
+  output << "\n Ouputs\n";
+  for (int i = 0; i < 3; i++) {
+    output << "\nStage:" << i + 1 << " Ra value: " << a[i] << "\n ";
+    output << "\nStage:" << i + 1 << " Rc value: " << b[3 - i - 1] << "\n ";
+  }
+  output.close();
+}
+
 void output(std::vector<double> a, std::vector<double> b) {
-  
 
   for (int i = 0; i < 3; i++) {
     std::cout << "\nStage:" << i + 1 << " Ra value: " << a[i] << "\n ";
-    std::cout << "\nStage:" << i + 1 << " Rc value: " << b[3-i-1] << "\n ";
+    std::cout << "\nStage:" << i + 1 << " Rc value: " << b[3 - i - 1] << "\n ";
   }
 };
 
@@ -210,9 +273,9 @@ std::array<double, 6> Chebyshev(int poles, int fc, std::string type,
     // cacluating for all stages  and adding to
 
     if (k[e] == 0) {
-      
-          // testing outputs
-          arr[i] = 0;
+
+      // testing outputs
+      arr[i] = 0;
       i = i + 1;
     } else {
 
