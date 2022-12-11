@@ -7,15 +7,17 @@
 class Inputs {
 public:
   Inputs();
+  Inputs(std::string type, std::string design, int poles,
+         double fc);
   // accessors to allow for user options
-  std::string get_type(); 
+  std::string get_type();
   std::string get_design();
   int get_poles();
   double get_fc();
 
 private:
   // member variables for all the different combinations
-  std::string type; 
+  std::string type;
   std::string design;
   int poles;
   double fc;
